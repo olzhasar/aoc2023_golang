@@ -49,15 +49,23 @@ func getSetTotals(setString string) Totals {
 	return totals
 }
 
-func CheckSets(input string, totals Totals) bool {
+func parseTotals(input string) []Totals {
+	result := []Totals{}
 	setStrings := strings.Split(input, ";")
 
 	for _, setString := range setStrings {
-		setTotals := getSetTotals(setString)
-		for i := 0; i < 3; i++ {
-			if setTotals[i] > totals[i] {
-				return false
-			}
+		totals := getSetTotals(setString)
+		result = append(result, totals)
+
+	}
+
+	return result
+}
+
+func checkSet(setTotals Totals, totals Totals) bool {
+	for i := 0; i < 3; i++ {
+		if setTotals[i] > totals[i] {
+			return false
 		}
 	}
 
@@ -67,10 +75,39 @@ func CheckSets(input string, totals Totals) bool {
 func checkGame(input string, totals Totals) int {
 	gameId, setsString := splitGameId(input)
 
-	if CheckSets(setsString, totals) {
-		return gameId
+	totalSets := parseTotals(setsString)
+
+	for _, set := range totalSets {
+		if !checkSet(set, totals) {
+			return 0
+		}
 	}
-	return 0
+
+	return gameId
+}
+
+func calcGamePower(input string) int {
+	_, setsString := splitGameId(input)
+
+	fewest := []int{0, 0, 0}
+
+	totalSets := parseTotals(setsString)
+
+	for _, set := range totalSets {
+		for i := 0; i < 3; i++ {
+			if set[i] > fewest[i] {
+				fewest[i] = set[i]
+			}
+		}
+	}
+
+	result := 1
+
+	for i := 0; i < 3; i++ {
+		result *= fewest[i]
+	}
+
+	return result
 }
 
 func main() {
@@ -80,14 +117,12 @@ func main() {
 	}
 	defer file.Close()
 
-	totals := Totals{12, 13, 14}
-
 	result := 0
 
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		result += checkGame(scanner.Text(), totals)
+		result += calcGamePower(scanner.Text())
 	}
 
 	fmt.Println(result)
