@@ -12,11 +12,24 @@ func TestGetTotalPoints(t *testing.T) {
 		"Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11",
 	}
 
-	expected := 13
+	t.Run("Part 1", func(t *testing.T) {
+		expected := 13
 
-	result := GetTotalPoints(exampleInput)
+		result := GetTotalPoints(exampleInput)
 
-	if result != expected {
-		t.Errorf("Expected %d, got %d", expected, result)
-	}
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+	})
+
+	t.Run("Part 2", func(t *testing.T) {
+		expected := 30
+
+		result := GetCardsCount(exampleInput)
+
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+	})
+
 }

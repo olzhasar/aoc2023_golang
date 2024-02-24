@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-func getCardPoints(card string) int {
+func getMatchingNumbers(card string) int {
 	card = strings.Split(card, ":")[1]
 
 	divided := strings.Split(card, "|")
 
 	winningNumbers := make(map[int]bool)
 
-	points := 0
+	total := 0
 
 	for _, str := range strings.Fields(divided[0]) {
 		num, err := strconv.Atoi(str)
@@ -32,15 +32,21 @@ func getCardPoints(card string) int {
 		}
 
 		if winningNumbers[num] == true {
-			if points == 0 {
-				points = 1
-			} else {
-				points *= 2
-			}
+			total++
 		}
 	}
 
-	return points
+	return total
+}
+
+func getCardPoints(card string) int {
+	matching := getMatchingNumbers(card)
+
+	if matching == 0 {
+		return 0
+	}
+
+	return 1 << (matching - 1)
 }
 
 func GetTotalPoints(input []string) int {
@@ -48,6 +54,26 @@ func GetTotalPoints(input []string) int {
 
 	for _, str := range input {
 		total += getCardPoints(str)
+	}
+	return total
+}
+
+func GetCardsCount(input []string) int {
+	total := 0
+
+	var copies []int
+
+	for i := 0; i < len(input); i++ {
+		copies = append(copies, 1)
+	}
+
+	for i, str := range input {
+		current := getMatchingNumbers(str)
+		total += copies[i]
+
+		for j := i + 1; j < i+current+1; j++ {
+			copies[j] += copies[i]
+		}
 	}
 	return total
 }
@@ -67,7 +93,7 @@ func main() {
 		input = append(input, scanner.Text())
 	}
 
-	result := GetTotalPoints(input)
+	result := GetCardsCount(input)
 
 	fmt.Println(result)
 }
