@@ -8,10 +8,21 @@ func TestGetNumWaysToWinMultiplied(t *testing.T) {
 		"Distance:  9  40  200",
 	}
 
-	expected := 288
-	result := GetNumWaysToWinMultiplied(exampleInput)
+	t.Run("Part 1", func(t *testing.T) {
+		expected := 288
+		result := GetNumWaysToWinMultiplied(exampleInput)
 
-	if result != expected {
-		t.Errorf("Expected %d, got %d", expected, result)
-	}
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+	})
+
+	t.Run("Part 2", func(t *testing.T) {
+		expected := 71503
+		result := GetNumWaysToWinMultipliedPartTwo(exampleInput)
+
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+	})
 }

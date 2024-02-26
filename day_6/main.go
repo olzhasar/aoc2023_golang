@@ -27,6 +27,12 @@ func parseNumbers(input string) []int {
 	return result
 }
 
+func parseSingleNumber(input string) int {
+	numString := strings.Split(input, ":")[1]
+	cleaned := strings.ReplaceAll(numString, " ", "")
+	return parseNumber(cleaned)
+}
+
 func getNumWaysToWin(time int, record int) int {
 	result := 0
 
@@ -55,6 +61,13 @@ func GetNumWaysToWinMultiplied(input []string) int {
 	return result
 }
 
+func GetNumWaysToWinMultipliedPartTwo(input []string) int {
+	time := parseSingleNumber(input[0])
+	distance := parseSingleNumber(input[1])
+
+	return getNumWaysToWin(time, distance)
+}
+
 func main() {
 	file, err := os.Open("input.txt")
 	if err != nil {
@@ -74,7 +87,7 @@ func main() {
 		panic(err)
 	}
 
-	result := GetNumWaysToWinMultiplied(input)
+	result := GetNumWaysToWinMultipliedPartTwo(input)
 
 	fmt.Println(result)
 }
