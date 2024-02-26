@@ -32,11 +32,24 @@ func TestGetLowestLocation(t *testing.T) {
 		"56 93 4",
 	}
 
-	expected := 35
+	t.Run("Part 1", func(t *testing.T) {
+		expected := 35
 
-	result := GetLowestLocation(exampleInput)
+		result := GetLowestLocation(exampleInput)
 
-	if result != expected {
-		t.Errorf("Expected %d, got %d", expected, result)
-	}
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+
+	})
+	t.Run("Part 2", func(t *testing.T) {
+		expected := 46
+
+		result := GetLowestLocationPart2(exampleInput)
+
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+
+	})
 }

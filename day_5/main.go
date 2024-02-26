@@ -4,11 +4,20 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
+
+func parseNum(s string) int {
+	num, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return num
+}
 
 func getSeeds(input string) []int {
 	result := make([]int, 0)
@@ -17,98 +26,74 @@ func getSeeds(input string) []int {
 	numsStrings := strings.Fields(numPart)
 
 	for _, num := range numsStrings {
-		n, err := strconv.Atoi(num)
-		if err != nil {
-			panic(err)
-		}
-
-		result = append(result, n)
+		result = append(result, parseNum(num))
 	}
 
 	return result
 }
 
-func processRow(input string, matrix [][]int, iteration int) {
+func parseRow(input string) (int, int, int) {
 	valueStrings := strings.Fields(input)
 
-	if len(valueStrings) != 3 {
-		panic("Invalid row")
+	var values [3]int
+
+	for i, str := range valueStrings {
+		values[i] = parseNum(str)
 	}
 
-	parseNum := func(s string) int {
-		num, err := strconv.Atoi(s)
-		if err != nil {
-			panic(err)
-		}
-		return num
-	}
+	return values[0], values[1], values[2]
+}
 
-	destStart := parseNum(valueStrings[0])
-	sourceStart := parseNum(valueStrings[1])
-	rangeLen := parseNum(valueStrings[2])
+func processRow(input string, result []int, visited []bool) []int {
+	destStart, sourceStart, rangeLen := parseRow(input)
 
-	for i := range matrix {
-		if len(matrix[i]) > iteration {
+	for i := 0; i < len(result); i++ {
+		if visited[i] {
 			continue
 		}
 
-		val := matrix[i][iteration-1]
-
-		if val >= sourceStart && val < sourceStart+rangeLen {
-			diff := val - sourceStart
-			matrix[i] = append(matrix[i], destStart+diff)
+		if result[i] >= sourceStart && result[i] < sourceStart+rangeLen {
+			diff := result[i] - sourceStart
+			result[i] = destStart + diff
+			visited[i] = true
 		}
+	}
+
+	return result
+}
+
+func resetVisited(visited []bool) {
+	for i := range visited {
+		visited[i] = false
 	}
 }
 
-func fillMissingValues(matrix [][]int, iteration int) {
-	for i := range matrix {
-		length := len(matrix[i])
-		if length <= iteration {
-			matrix[i] = append(matrix[i], matrix[i][length-1])
-		}
-	}
-}
-
-func processMap(input []string, matrix [][]int) {
-	iteration := 0
+func processMap(input []string, result []int) []int {
+	visited := make([]bool, len(result))
+	resetVisited(visited)
 
 	for _, row := range input {
 		firstRune, _ := utf8.DecodeRuneInString(row)
 		if unicode.IsDigit(firstRune) {
-			processRow(row, matrix, iteration)
-		} else if unicode.IsLetter(firstRune) {
-			if iteration > 0 {
-				fillMissingValues(matrix, iteration)
-			}
-			iteration++
+			result = processRow(row, result, visited)
+		} else {
+			resetVisited(visited)
 		}
 	}
 
-	fillMissingValues(matrix, iteration)
-
+	return result
 }
 
 func GetLowestLocation(input []string) int {
 	seeds := getSeeds(input[0])
-	var matrix [][]int
 
-	for i := 0; i < len(seeds); i++ {
-		matrix = append(matrix, []int{seeds[i]})
-	}
+	result := processMap(input[1:], seeds)
 
-	processMap(input[1:], matrix)
+	return slices.Min(result)
+}
 
-	lowest := matrix[0][len(matrix[0])-1]
-
-	for i := range matrix[1:] {
-		length := len(matrix[i+1])
-		if matrix[i+1][length-1] < lowest {
-			lowest = matrix[i+1][length-1]
-		}
-	}
-
-	return lowest
+func GetLowestLocationPart2(input []string) int {
+	return 0
 }
 
 func main() {
@@ -129,5 +114,4 @@ func main() {
 	result := GetLowestLocation(input)
 
 	fmt.Println(result)
-
 }
