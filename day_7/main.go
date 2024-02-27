@@ -24,6 +24,14 @@ One pair, where two cards share one label, and the other three cards have a diff
 High card, where all cards' labels are distinct: 23456
 */
 
+const FIVE_OF_A_KIND = 7
+const FOUR_OF_A_KIND = 6
+const FULL_HOUSE = 5
+const THREE_OF_A_KIND = 4
+const TWO_PAIR = 3
+const ONE_PAIR = 2
+const HIGH_CARD = 1
+
 func getCombinationScore(hand string) int {
 	kinds := make(map[string]int)
 	largest := 0
@@ -37,23 +45,78 @@ func getCombinationScore(hand string) int {
 
 	switch len(kinds) {
 	case 1:
-		return 6
+		return FIVE_OF_A_KIND
 	case 2:
 		if largest == 4 {
-			return 5
+			return FOUR_OF_A_KIND
 		}
-		return 4
+		return FULL_HOUSE
 	case 3:
 		if largest == 3 {
-			return 3
+			return THREE_OF_A_KIND
 		}
-		return 2
+		return TWO_PAIR
 	case 4:
-		return 1
+		return ONE_PAIR
 	case 5:
-		return 0
+		return HIGH_CARD
 	}
 
+	panic("Invalid hand")
+}
+
+func getCombinationScorePart2(hand string) int {
+	kinds := make(map[string]int)
+	jokers := 0
+	largest := 0
+
+	for _, card := range hand {
+		if string(card) == "J" {
+			jokers++
+		}
+		kinds[string(card)]++
+		if kinds[string(card)] > largest {
+			largest = kinds[string(card)]
+		}
+	}
+
+	switch len(kinds) {
+	case 1:
+		return FIVE_OF_A_KIND
+	case 2:
+		if jokers > 0 {
+			return FIVE_OF_A_KIND
+		}
+
+		if largest == 4 {
+			return FOUR_OF_A_KIND
+		}
+		return FULL_HOUSE
+	case 3:
+		if largest == 3 {
+			if jokers > 0 {
+				return FOUR_OF_A_KIND
+			}
+			return THREE_OF_A_KIND
+		}
+		if jokers == 2 {
+			return FOUR_OF_A_KIND
+		}
+		if jokers == 1 {
+			return FULL_HOUSE
+		}
+		return TWO_PAIR
+	case 4:
+		if jokers > 0 {
+			return THREE_OF_A_KIND
+		}
+		return ONE_PAIR
+	case 5:
+		if jokers == 1 {
+			return ONE_PAIR
+		}
+		return HIGH_CARD
+	}
 	panic("Invalid hand")
 }
 
@@ -78,11 +141,18 @@ func getCardSore(card string) int {
 	}
 }
 
-func getScore(hand string) int {
+func getCardSorePart2(card string) int {
+	if card == "J" {
+		return 0
+	}
+	return getCardSore(card)
+}
+
+func getScore(hand string, combScoreFunc func(h string) int, cardScoreFunc func(h string) int) int {
 	score := 0
 	base := 16
 
-	combScore := getCombinationScore(hand)
+	combScore := combScoreFunc(hand)
 
 	pow := func(x, y int) int {
 		return int(math.Pow(float64(x), float64(y)))
@@ -91,7 +161,7 @@ func getScore(hand string) int {
 	score += combScore * pow(base, 6)
 
 	for i, card := range hand {
-		score += getCardSore(string(card)) * pow(base, 5-i)
+		score += cardScoreFunc(string(card)) * pow(base, 5-i)
 	}
 
 	return score
@@ -105,19 +175,19 @@ func getBid(val string) int {
 	return result
 }
 
-func parseHand(hand string) [2]int {
+func parseHand(hand string, combScoreFunc func(h string) int, cardScoreFunc func(h string) int) [2]int {
 	parts := strings.Fields(hand)
-	score := getScore(parts[0])
+	score := getScore(parts[0], combScoreFunc, cardScoreFunc)
 	bid := getBid(parts[1])
 
 	return [2]int{score, bid}
 }
 
-func GetTotalWinnings(input []string) int {
+func GetTotalWinnings(input []string, combScoreFunc func(h string) int, cardScoreFunc func(h string) int) int {
 	hands := make([][2]int, 0)
 
 	for _, line := range input {
-		hands = append(hands, parseHand(line))
+		hands = append(hands, parseHand(line, combScoreFunc, cardScoreFunc))
 	}
 
 	sort.Slice(hands, func(i, j int) bool {
@@ -131,6 +201,14 @@ func GetTotalWinnings(input []string) int {
 	}
 
 	return result
+}
+
+func GetTotalWinningsPart1(input []string) int {
+	return GetTotalWinnings(input, getCombinationScore, getCardSore)
+}
+
+func GetTotalWinningsPart2(input []string) int {
+	return GetTotalWinnings(input, getCombinationScorePart2, getCardSorePart2)
 }
 
 func main() {
@@ -147,7 +225,7 @@ func main() {
 		input = append(input, scanner.Text())
 	}
 
-	result := GetTotalWinnings(input)
+	result := GetTotalWinningsPart2(input)
 
 	fmt.Println(result)
 }

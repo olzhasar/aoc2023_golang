@@ -13,7 +13,16 @@ func TestGetTotalWInnings(t *testing.T) {
 
 	t.Run("Part 1", func(t *testing.T) {
 		expected := 6440
-		result := GetTotalWinnings(exampleInput)
+		result := GetTotalWinningsPart1(exampleInput)
+
+		if result != expected {
+			t.Errorf("Expected %d, got %d", expected, result)
+		}
+	})
+
+	t.Run("Part 2", func(t *testing.T) {
+		expected := 5905
+		result := GetTotalWinningsPart2(exampleInput)
 
 		if result != expected {
 			t.Errorf("Expected %d, got %d", expected, result)
