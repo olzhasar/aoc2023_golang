@@ -63,7 +63,7 @@ func TestCalculateStepsPartTwo(t *testing.T) {
 
 	result := CalculateStepsPartTwo(input)
 
-	if int(result.Int64()) != expected {
+	if int(result) != expected {
 		t.Errorf("Expected %d, got %d", expected, result)
 	}
 }

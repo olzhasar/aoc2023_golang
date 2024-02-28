@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math/big"
 	"os"
 	"strings"
 )
@@ -81,24 +80,20 @@ func findPathLength(directions string, mapping map[string][2]string, start strin
 	return i
 }
 
-func calculateLCMForTwo(a, b *big.Int) *big.Int {
-	gcd := new(big.Int).GCD(nil, nil, a, b)
-	return new(big.Int).Div(new(big.Int).Mul(a, b), gcd)
+func calculateGCD(a, b uint64) uint64 {
+	// Euclidean algorithm
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
 }
 
-func CalculateLCM(numbers []int) *big.Int {
-	if len(numbers) == 0 {
-		return big.NewInt(0)
-	}
-
-	lcm := big.NewInt(int64(numbers[0]))
-	for i := 1; i < len(numbers); i++ {
-		lcm = calculateLCMForTwo(lcm, big.NewInt(int64(numbers[i])))
-	}
-	return lcm
+func calculateLCM(a, b uint64) uint64 {
+	gcd := calculateGCD(a, b)
+	return a * b / gcd
 }
 
-func CalculateStepsPartTwo(input []string) *big.Int {
+func CalculateStepsPartTwo(input []string) uint64 {
 	directions := input[0]
 
 	mapping := makeMap(input[1:])
@@ -111,7 +106,13 @@ func CalculateStepsPartTwo(input []string) *big.Int {
 		}
 	}
 
-	return CalculateLCM(paths)
+	lcm := uint64(paths[0])
+
+	for _, path := range paths[1:] {
+		lcm = calculateLCM(lcm, uint64(path))
+	}
+
+	return lcm
 }
 
 func main() {
