@@ -46,15 +46,43 @@ func predictNextValue(nums []int) int {
 	return nums[length-1] + predictNextValue(diffs)
 }
 
-func GetExtrapolatedSum(input []string) int {
+func predictPrevValue(nums []int) int {
+	length := len(nums)
+
+	if length == 0 {
+		return 0
+	}
+
+	if length == 1 {
+		return nums[0]
+	}
+
+	var diffs []int
+
+	for i := 1; i < length; i++ {
+		diffs = append(diffs, nums[i-1]-nums[i])
+	}
+
+	return nums[0] + predictPrevValue(diffs)
+}
+
+func getSum(input []string, predictFunc func([]int) int) int {
 	total := 0
 
 	for _, row := range input {
 		nums := parseRow(row)
-		total += predictNextValue(nums)
+		total += predictFunc(nums)
 	}
 
 	return total
+}
+
+func GetExtrapolatedSum(input []string) int {
+	return getSum(input, predictNextValue)
+}
+
+func GetExtrapolatedSumPartTwo(input []string) int {
+	return getSum(input, predictPrevValue)
 }
 
 func main() {
@@ -76,7 +104,7 @@ func main() {
 		panic(err)
 	}
 
-	result := GetExtrapolatedSum(input)
+	result := GetExtrapolatedSumPartTwo(input)
 
 	fmt.Println(result)
 }
